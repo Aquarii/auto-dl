@@ -1,36 +1,57 @@
-name: Publish Obtainium APK as GitHub Release
+name: Download & Compress APK from Obtainium Release
 
 on:
-  workflow_dispatch:
-env:
-  VERSION: v1.4.3
+  workflow_dispatch: # Manually trigger via UI button
 
 jobs:
-  publish-release:
+  download-and-compress:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
+      - name: Checkout this repo
         uses: actions/checkout@v5
 
-      - name: Create dl folder
+      - name: Create dl directory
         run: mkdir -p dl/
 
-      - name: Download APK
+      # 🚀 Step: Download the APK directly using curl (from your provided URL)
+      - name: Download app-arm64-v8a-release.apk from GitHub Release
         run: |
-          FILE_URL="https://github.com/ImranR98/Obtainium/releases/download/${{ env.VERSION }}/app-arm64-v8a-release.apk"
-          curl -L -o dl/app-arm64-v8a-release.apk "$FILE_URL"
-
-      - name: Create ZIP
+          echo "⬇️ Starting download of app-arm64-v8a-release.apk..."
+          FILE_URL="https://github.com/ImranR98/Obtainium/releases/download/v1.4.3/app-arm64-v8a-release.apk"
+          curl -L -f --create-dirs -o dl/app-arm64-v8a-release.apk "$FILE_URL"
+      # 🔍 Verify the download was successful
+      - name: Verify APK download
+        run: |
+          if [ ! -f "dl/app-arm64-v8a-release.apk" ]; then
+            echo "❌ Failed to download APK"
+            exit 1
+          fi
+          echo "✅ Successfully downloaded app-arm64-v8a-release.apk"
+      # 📦 Step: Create a .zip archive of the APK file
+      - name: Compress APK into .zip format
         run: |
           cd dl/
           zip -q -j app-arm64-v8a-release.apk.zip app-arm64-v8a-release.apk
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v3
+      # 🔍 Verify the zip was created
+      - name: Check if .zip file exists
+        run: |
+          if [ ! -f "dl/app-arm64-v8a-release.apk.zip" ]; then
+            echo "❌ Failed to create zip file"
+            exit 1
+          fi
+          echo "✅ Successfully created app-arm64-v8a-release.apk.zip"
+      # 📤 Optional: Commit the files (if you want them in your repo)
+      - name: Upload APK ZIP as Artifact
+        uses: actions/upload-artifact@v7
         with:
-          tag_name: ${{ env.VERSION }}
-          release_name: Obtainium APK v${{ env.VERSION }}
-          body: |
-            This is the official Obtainium APK for Android.
+          name: obtainium-apk-v1.4.3.zip
+          path: dl/app-arm64-v8a-release.apk.zip
+          retention-days: 7
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        if: github.ref_type == 'tag'
+        with:
+          working_directory: dl
           files: |
-            dl/app-arm64-v8a-release.apk.zip
+            app-arm64-v8a-release.apk.zip
