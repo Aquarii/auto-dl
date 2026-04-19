@@ -1,0 +1,54 @@
+name: Download & Compress APK from Obtainium Release
+
+on:
+  workflow_dispatch: # Manually trigger via UI button
+
+jobs:
+  download-and-compress:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Create dl directory
+        run: mkdir -p dl/
+
+      # 🚀 Step: Download the APK directly using curl (from your provided URL)
+      - name: Download app-arm64-v8a-release.apk from GitHub Release
+        run: |
+          echo "⬇️ Starting download of app-arm64-v8a-release.apk..."
+          FILE_URL="https://github.com/ImranR98/Obtainium/releases/download/v1.4.3/app-arm64-v8a-release.apk"
+          curl -L -f --create-dirs -o dl/app-arm64-v8a-release.apk "$FILE_URL"
+
+      # 🔍 Verify the download was successful
+      - name: Check if APK file exists and is valid
+        run: |
+          if [ ! -f "dl/app-arm64-v8a-release.apk" ]; then
+            echo "❌ Failed to download APK"
+            exit 1
+          fi
+          echo "✅ Successfully downloaded app-arm64-v8a-release.apk"
+
+      # 📦 Step: Create a .zip archive of the APK file
+      - name: Compress APK into .zip format
+        run: |
+          cd dl/
+          zip -q -j app-arm64-v8a-release.apk.zip app-arm64-v8a-release.apk
+
+      # 🔍 Verify the zip was created
+      - name: Check if .zip file exists
+        run: |
+          if [ ! -f "dl/app-arm64-v8a-release.apk.zip" ]; then
+            echo "❌ Failed to create zip file"
+            exit 1
+          fi
+          echo "✅ Successfully created app-arm64-v8a-release.apk.zip"
+
+      # 📤 Optional: Commit the files (if you want them in your repo)
+      - name: Push updated dl/ folder to main branch
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'Auto-downloaded and zipped Obtainium APK v1.4.3'
+          commit_branch: main
+
