@@ -52,7 +52,7 @@ jobs:
           git add --all
           git commit -m "commit msg"
           git remote add origin ${{github.repositoryUrl}}
-          git push
+          git push origin main
           
       # 📤 Optional: Commit the files (if you want them in your repo)
       - name: Upload APK ZIP as Artifact
