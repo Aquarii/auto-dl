@@ -45,14 +45,14 @@ jobs:
           fi
           echo "✅ Successfully created app-arm64-v8a-release.apk.zip"
 
-      - name: commit downloaded file to the repo
-        run: |
-          git config --global user.name "Ali Korloo"
-          git config --global user.email "korloo@outlook.com"
-          git add --all
-          git commit -m "commit msg"
-          git remote add origin ${{github.repositoryUrl}}
-          git push origin main
+      # - name: commit downloaded file to the repo
+      #   run: |
+      #     git config --global user.name "Ali Korloo"
+      #     git config --global user.email "korloo@outlook.com"
+      #     git add --all
+      #     git commit -m "commit msg"
+      #     git remote add origin ${{github.repository}}
+      #     git push origin main
           
       # 📤 Optional: Commit the files (if you want them in your repo)
       - name: Upload APK ZIP as Artifact
