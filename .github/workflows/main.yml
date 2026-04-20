@@ -21,6 +21,7 @@ jobs:
           echo "⬇️ Starting download of app-arm64-v8a-release.apk..."
           FILE_URL="https://github.com/ImranR98/Obtainium/releases/download/v1.4.3/app-arm64-v8a-release.apk"
           curl -L -f --create-dirs -o dl/app-arm64-v8a-release.apk "$FILE_URL"
+      
       # 🔍 Verify the download was successful
       - name: Verify APK download
         run: |
@@ -29,6 +30,7 @@ jobs:
             exit 1
           fi
           echo "✅ Successfully downloaded app-arm64-v8a-release.apk"
+      
       # 📦 Step: Create a .zip archive of the APK file
       - name: Compress APK into .zip format
         run: |
@@ -49,14 +51,23 @@ jobs:
           git config --global user.email "korloo@outlook.com"
           git add --all
           git commit -m "commit msg"
+          git remote add origin ${{github.repositoryUrl}}
+          git push
           
       # 📤 Optional: Commit the files (if you want them in your repo)
       - name: Upload APK ZIP as Artifact
+        id: upload-step
         uses: actions/upload-artifact@v7
         with:
           name: obtainium-apk-v1.4.3.zip
           path: dl/app-arm64-v8a-release.apk.zip
           retention-days: 7
+
+      - name: download the uploaded artifact to the repo 
+        uses: actions/download-artifact@v8
+        with:
+          name: obtainium-apk-v1.4.3.zip
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         # if: github.ref_type == 'tag'
@@ -64,7 +75,7 @@ jobs:
           # repository: ${{github.repository}}
           tag_name: v1.4.3
           name: Obtainium APK v1.4.3
-          working_directory: /dl
+          # working_directory: /dl
           make_latest: true
           body: |
             This is the official Obtainium APK for Android.
@@ -72,7 +83,8 @@ jobs:
             app-arm64-v8a-release.apk.zip
           draft: false
           prerelease: false
-          
+      
+      
 
       - name: Success message
         run: echo "✅ Successfully published Obtainium APK v1.4.3 to GitHub Releases"
