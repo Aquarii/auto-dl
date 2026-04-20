@@ -68,13 +68,19 @@ jobs:
         with:
           name: obtainium-apk-v1.4.3.zip
 
+      - name: Get latest release version from API
+        id: latest_version
+        run: |
+          RELEASE_API="https://api.github.com/repos/ImranR98/Obtainium/releases/latest"
+          VERSION=$(curl -s "$RELEASE_API" | jq -r '.tag_name')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
-        # if: github.ref_type == 'tag'
         with:
           # repository: ${{github.repository}}
-          tag_name: v1.4.3
-          name: Obtainium APK v1.4.3
+          tag_name: ${{env.VERSION}}
+          name: Obtainium APK v${{env.VERSION}}
           # working_directory: /dl
           make_latest: true
           body: |
